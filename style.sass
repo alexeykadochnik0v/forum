@@ -228,6 +228,7 @@ a
         display: flex
         justify-content: space-between
         align-items: flex-end
+        margin-bottom: 16px
 
     &__title
         font-family: Inter
@@ -916,3 +917,26 @@ a
             align-items: flex-start
             span
                 background-color: #fff
+
+.speakers__container
+    display: grid
+    gap: 24px
+
+.swiper
+    width: 100%
+    overflow: hidden
+
+    &-slide
+        display: flex
+        justify-content: center
+
+/* Стили для мобильного */
+@media (max-width: 480px)
+    .speakers__container
+        display: grid
+        grid-template-columns: 1fr
+        gap: 16px
+
+    .speaker
+        margin: 0 auto
+

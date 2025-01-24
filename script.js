@@ -157,3 +157,98 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const speakersContainer = document.querySelector(".speakers__container"); // Изначальный контейнер с карточками
+    const speakers = Array.from(speakersContainer.querySelectorAll(".speaker")); // Все карточки спикеров
+    const speakersSlider = document.querySelector(".speakers__slider");
+
+    // Конфигурация для разных экранов
+    const breakpoints = {
+        desktop: { slidesPerGroup: 8, columns: 4 }, // 8 карточек, 4 колонки
+        tabletLandscape: { slidesPerGroup: 6, columns: 3 }, // 6 карточек, 3 колонки
+        tabletPortrait: { slidesPerGroup: 4, columns: 2 }, // 4 карточки, 2 колонки
+        mobile: { slidesPerGroup: 1, columns: 1 }, // 1 карточка, частично видна следующая
+    };
+
+    // Функция получения настроек для текущего экрана
+    const getBreakpointSettings = () => {
+        const width = window.innerWidth;
+        if (width >= 1024) return breakpoints.desktop;
+        if (width >= 768) return breakpoints.tabletLandscape;
+        if (width >= 480) return breakpoints.tabletPortrait;
+        return breakpoints.mobile;
+    };
+
+    // Создание структуры для Swiper
+    const createSwiperStructure = () => {
+        const { slidesPerGroup, columns } = getBreakpointSettings();
+
+        // Удаляем старую структуру
+        speakersSlider.innerHTML = '<div class="swiper-wrapper"></div>';
+        const swiperWrapper = speakersSlider.querySelector(".swiper-wrapper");
+
+        // Разбиваем карточки на группы
+        for (let i = 0; i < speakers.length; i += slidesPerGroup) {
+            const group = speakers.slice(i, i + slidesPerGroup);
+
+            // Создаём слайд
+            const slide = document.createElement("div");
+            slide.classList.add("swiper-slide", "speakers__container");
+            slide.style.display = "grid";
+            slide.style.gridTemplateColumns = `repeat(${columns}, 1fr)`; // Количество колонок
+            slide.style.gap = "24px";
+
+            // Для мобильного: все карточки в 1 колонку
+            if (columns === 1) {
+                slide.style.gridTemplateColumns = "1fr";
+                slide.style.justifyItems = "center"; // Центрируем карточки
+            }
+
+            // Добавляем карточки в слайд
+            group.forEach((speaker) => {
+                slide.appendChild(speaker.cloneNode(true));
+            });
+
+            // Добавляем слайд в swiper-wrapper
+            swiperWrapper.appendChild(slide);
+        }
+    };
+
+    // Инициализация Swiper
+    const initSwiper = () => {
+        new Swiper(".speakers__slider", {
+            slidesPerView: 1.2, // На мобильных частично виден следующий слайд
+            spaceBetween: 16, // Отступы между карточками
+            navigation: {
+                nextEl: ".speakers__nav_next",
+                prevEl: ".speakers__nav_prev",
+            },
+            breakpoints: {
+                480: {
+                    slidesPerView: 2, // На планшетах показываем 2 карточки
+                    spaceBetween: 16,
+                },
+                768: {
+                    slidesPerView: 3, // На планшетах в альбомной ориентации — 3 карточки
+                    spaceBetween: 24,
+                },
+                1024: {
+                    slidesPerView: 1, // На десктопе слайды создаются по группам (управляет JS)
+                },
+            },
+        });
+    };
+
+    // Основная функция: пересоздание структуры и инициализация Swiper
+    const rebuildSwiper = () => {
+        createSwiperStructure(); // Создаём слайды
+        initSwiper(); // Инициализируем Swiper
+    };
+
+    // Изначальная сборка
+    rebuildSwiper();
+
+    // Пересоздаём структуру при изменении размера окна
+    window.addEventListener("resize", rebuildSwiper);
+});
+
