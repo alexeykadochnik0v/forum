@@ -68,25 +68,30 @@ document.addEventListener("DOMContentLoaded", () => {
         // Определяем направление переключения
         const direction = page > lastPage ? "next" : "prev";
 
-        // Скрываем текущие изображения с правильным эффектом
+        // Проходим по всем изображениям
         Array.from(galleryContent.children).forEach((img, index) => {
             if (index >= start && index < end) {
+                // Отображаем текущие изображения с анимацией
                 img.classList.remove("fade-out-left", "fade-out-right");
                 img.classList.add(direction === "next" ? "fade-in-right" : "fade-in-left");
-                img.style.display = "block"; // Показываем картинку
+                img.style.display = "block"; // Делаем картинку видимой
             } else {
+                // Скрываем остальные изображения с анимацией
                 if (img.style.display === "block") {
                     img.classList.remove("fade-in-right", "fade-in-left");
                     img.classList.add(direction === "next" ? "fade-out-left" : "fade-out-right");
+
+                    // Полностью скрываем после завершения анимации
                     setTimeout(() => {
-                        img.style.display = "none"; // Полностью скрываем после анимации
+                        img.style.display = "none";
                     }, 500); // Задержка совпадает с длительностью анимации
                 }
             }
         });
 
-        lastPage = page; // Обновляем последнюю страницу
+        lastPage = page; // Обновляем текущую страницу
     }
+
 
 
     // Обработчик для кнопки "Назад"
@@ -147,108 +152,24 @@ document.addEventListener("DOMContentLoaded", () => {
     showPage(currentPage);
     updateButtons();
 });
-
 document.addEventListener("DOMContentLoaded", () => {
     const burger = document.querySelector(".header__burger");
     const header = document.querySelector(".header");
+    const nav = document.querySelector(".nav");
 
-    burger.addEventListener("click", () => {
+    // Обработчик для клика на бургер
+    burger.addEventListener("click", (event) => {
+        event.stopPropagation(); // Предотвращаем всплытие клика
         header.classList.toggle("menu-open");
+    });
+
+    // Обработчик клика по документу
+    document.addEventListener("click", (event) => {
+        // Если меню открыто и клик произошел вне меню
+        if (header.classList.contains("menu-open") && !nav.contains(event.target) && !burger.contains(event.target)) {
+            header.classList.remove("menu-open");
+        }
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const speakersContainer = document.querySelector(".speakers__container"); // Изначальный контейнер с карточками
-    const speakers = Array.from(speakersContainer.querySelectorAll(".speaker")); // Все карточки спикеров
-    const speakersSlider = document.querySelector(".speakers__slider");
-
-    // Конфигурация для разных экранов
-    const breakpoints = {
-        desktop: { slidesPerGroup: 8, columns: 4 }, // 8 карточек, 4 колонки
-        tabletLandscape: { slidesPerGroup: 6, columns: 3 }, // 6 карточек, 3 колонки
-        tabletPortrait: { slidesPerGroup: 4, columns: 2 }, // 4 карточки, 2 колонки
-        mobile: { slidesPerGroup: 1, columns: 1 }, // 1 карточка, частично видна следующая
-    };
-
-    // Функция получения настроек для текущего экрана
-    const getBreakpointSettings = () => {
-        const width = window.innerWidth;
-        if (width >= 1024) return breakpoints.desktop;
-        if (width >= 768) return breakpoints.tabletLandscape;
-        if (width >= 480) return breakpoints.tabletPortrait;
-        return breakpoints.mobile;
-    };
-
-    // Создание структуры для Swiper
-    const createSwiperStructure = () => {
-        const { slidesPerGroup, columns } = getBreakpointSettings();
-
-        // Удаляем старую структуру
-        speakersSlider.innerHTML = '<div class="swiper-wrapper"></div>';
-        const swiperWrapper = speakersSlider.querySelector(".swiper-wrapper");
-
-        // Разбиваем карточки на группы
-        for (let i = 0; i < speakers.length; i += slidesPerGroup) {
-            const group = speakers.slice(i, i + slidesPerGroup);
-
-            // Создаём слайд
-            const slide = document.createElement("div");
-            slide.classList.add("swiper-slide", "speakers__container");
-            slide.style.display = "grid";
-            slide.style.gridTemplateColumns = `repeat(${columns}, 1fr)`; // Количество колонок
-            slide.style.gap = "24px";
-
-            // Для мобильного: все карточки в 1 колонку
-            if (columns === 1) {
-                slide.style.gridTemplateColumns = "1fr";
-                slide.style.justifyItems = "center"; // Центрируем карточки
-            }
-
-            // Добавляем карточки в слайд
-            group.forEach((speaker) => {
-                slide.appendChild(speaker.cloneNode(true));
-            });
-
-            // Добавляем слайд в swiper-wrapper
-            swiperWrapper.appendChild(slide);
-        }
-    };
-
-    // Инициализация Swiper
-    const initSwiper = () => {
-        new Swiper(".speakers__slider", {
-            slidesPerView: 1.2, // На мобильных частично виден следующий слайд
-            spaceBetween: 16, // Отступы между карточками
-            navigation: {
-                nextEl: ".speakers__nav_next",
-                prevEl: ".speakers__nav_prev",
-            },
-            breakpoints: {
-                480: {
-                    slidesPerView: 2, // На планшетах показываем 2 карточки
-                    spaceBetween: 16,
-                },
-                768: {
-                    slidesPerView: 3, // На планшетах в альбомной ориентации — 3 карточки
-                    spaceBetween: 24,
-                },
-                1024: {
-                    slidesPerView: 1, // На десктопе слайды создаются по группам (управляет JS)
-                },
-            },
-        });
-    };
-
-    // Основная функция: пересоздание структуры и инициализация Swiper
-    const rebuildSwiper = () => {
-        createSwiperStructure(); // Создаём слайды
-        initSwiper(); // Инициализируем Swiper
-    };
-
-    // Изначальная сборка
-    rebuildSwiper();
-
-    // Пересоздаём структуру при изменении размера окна
-    window.addEventListener("resize", rebuildSwiper);
-});
 
