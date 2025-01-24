@@ -274,10 +274,12 @@ a {
   grid-template-columns: repeat(auto-fit, 300px);
   gap: 24px;
 }
+.speakers__nav_prev svg {
+  transform: rotate(180deg);
+}
 .speakers__controls {
   display: flex;
   justify-content: center;
-  gap: 12px;
 }
 .speakers__controls button {
   width: 48px;
